@@ -33,20 +33,13 @@ export default function WhiteHatStats(props){
                 'count': state.count,
                 'name': state.state,
                 'easeOfDrawing': dd === undefined? 5: dd,
+                'male_count': state.male_count,
+                'female_count': state.count - state.male_count,
                 'genderRatio': state.male_count/state.count,
                 'population': parseInt(state.population)
             }
             plotData.push(entry)
         }
-
-        //get transforms for each value into x and y coordinates
-//        let xScale = d3.scaleLinear()
-//            .domain(d3.extent(plotData,d=>d.easeOfDrawing))
-//            .domain(d3.extent(plotData,d=>((d.population)/100000)))
-//            .range([margin+radius,width-margin-radius]);
-//        let yScale = d3.scaleLinear()
-//            .domain(d3.extent(plotData,d=>d.count))
-//            .range([height-margin-radius,margin+radius]);
 
         let yScale = d3.scaleLinear()
             .domain(d3.extent(plotData,d=>((d.population)/500000)))
@@ -79,14 +72,13 @@ export default function WhiteHatStats(props){
         svg.selectAll('.dot').data(plotData)
             .enter().append('circle')
             .attr('cx',d=> xScale(d.count))
-//            .attr('cx',d=>xScale(d.easeOfDrawing))
             .attr('cy',d=> yScale((d.population)/500000))
             .attr('fill',d=> colorScale(d.genderRatio))
             .attr('r',10)
             .on('mouseover',(e,d)=>{
                 let string = d.name + '</br>'
-                    + 'Gun Deaths: ' + d.count + '</br>'
-                    + 'Difficulty Drawing: ' + d.easeOfDrawing;
+                    + 'Male Deaths: ' + d.male_count + '</br>'
+                    + 'Female Deaths: ' + d.female_count + '</br>';
                 props.ToolTip.moveTTipEvent(tTip,e)
                 tTip.html(string)
             }).on('mousemove',(e)=>{
@@ -122,16 +114,6 @@ export default function WhiteHatStats(props){
             .attr('font-size',10)
             .text("I'm just asking questions");
 
-        //draw basic axes using the x and y scales
-//        svg.selectAll('g').remove()
-//        svg.append('g')
-//            .attr('transform',`translate(0,${height-margin+1})`)
-//            .call(d3.axisBottom(xScale))
-//
-//        svg.append('g')
-//            .attr('transform',`translate(${margin-2},0)`)
-//            .call(d3.axisLeft(yScale))
-
 // -----------
     let xAxis = d3.axisBottom(xScale);
     let yAxis = d3.axisLeft(yScale);
@@ -158,20 +140,11 @@ export default function WhiteHatStats(props){
         yAxisGroup.call(yAxis);
 
         // Apply the zoom transformation to the circles
-        svg.selectAll('.dot')
-            .attr('transform', event.transform);
-//        const { transform } = event;
-//
-//        console.log(transform);
-//
-//        xScale.domain(transform.rescaleX(xScale).domain());
-//        yScale.domain(transform.rescaleY(yScale).domain());
-//
-//        // Redraw the circles with the updated scales
-//        svg.selectAll('.dot')
-//            .attr('cx', d => xScale(d.count))
-//            .attr('cy', d => yScale((d.population) / 500000))
-//            .attr('r', 10 / transform.k); // Scale the circle radius based on zoom level
+        svg.selectAll('circle')
+            .attr('transform', event.transform)
+            .attr('cx', d => new_xScale(d.count))
+            .attr('cy', d => new_yScale((d.population) / 500000))
+            .attr('r', 10 / event.transform.k);
     }
 
     const zoom = d3.zoom()

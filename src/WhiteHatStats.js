@@ -123,58 +123,65 @@ export default function WhiteHatStats(props){
             .text("I'm just asking questions");
 
         //draw basic axes using the x and y scales
-        svg.selectAll('g').remove()
-        svg.append('g')
-            .attr('transform',`translate(0,${height-margin+1})`)
-            .call(d3.axisBottom(xScale))
+//        svg.selectAll('g').remove()
+//        svg.append('g')
+//            .attr('transform',`translate(0,${height-margin+1})`)
+//            .call(d3.axisBottom(xScale))
+//
+//        svg.append('g')
+//            .attr('transform',`translate(${margin-2},0)`)
+//            .call(d3.axisLeft(yScale))
 
-        svg.append('g')
-            .attr('transform',`translate(${margin-2},0)`)
-            .call(d3.axisLeft(yScale))
+// -----------
+    let xAxis = d3.axisBottom(xScale);
+    let yAxis = d3.axisLeft(yScale);
 
-        //set up zooming
-        function zoomed(event) {
-            const {transform} = event;
-            mapGroupSelection
-                .attr("transform", transform)
-               .attr("stroke-width", 1 / transform.k);
-        }
+    // Append the axes to the SVG
+    let xAxisGroup = svg.append('g')
+        .attr('transform', `translate(0,${height-margin+1})`)
+        .call(xAxis);
 
-        const zoom = d3.zoom()
-            .on("zoom", zoomed);
+    let yAxisGroup = svg.append('g')
+        .attr('transform',`translate(${margin-2},0)`)
+        .call(yAxis);
 
-        function clicked(event, d) {
-            event.stopPropagation();
-            if(isZoomed){
-                mapGroupSelection.transition().duration(300).call(
-                    zoom.transform,
-                    d3.zoomIdentity.translate(0,0),
-                    d3.pointer(event,svg.node())
-                )
-            }
-            else{
-                //get bounds of path from map
-                const [[x0, y0], [x1, y1]] = geoGenerator.bounds(d);
-                //zoom to bounds
-                mapGroupSelection.transition().duration(750).call(
-                    zoom.transform,
-                    d3.zoomIdentity
-                    .translate(width / 2, height / 2)
-                    .scale(Math.min(8, 0.9 / Math.max((x1 - x0) / width, (y1 - y0) / height)))
-                    .translate(-(x0 + x1) / 2, -(y0 + y1) / 2),
-                    d3.pointer(event, svg.node())
-                );
-            }
-            //if we are zoomed in, unzoom instead
-            isZoomed = !isZoomed;
-            if(isZoomed){
-                props.setZoomedState(d.properties.NAME);
-            } else{
-                props.setZoomedState(undefined);
-            }
-        }
+    function zoomed(event) {
+        let new_xScale = event.transform.rescaleX(xScale);
+        let new_yScale = event.transform.rescaleY(yScale);
 
-    },[props.data,svg]);
+        // Update the axes
+        xAxis.scale(new_xScale);
+        yAxis.scale(new_yScale);
+
+        // Redraw the axes
+        xAxisGroup.call(xAxis);
+        yAxisGroup.call(yAxis);
+
+        // Apply the zoom transformation to the circles
+        svg.selectAll('.dot')
+            .attr('transform', event.transform);
+//        const { transform } = event;
+//
+//        console.log(transform);
+//
+//        xScale.domain(transform.rescaleX(xScale).domain());
+//        yScale.domain(transform.rescaleY(yScale).domain());
+//
+//        // Redraw the circles with the updated scales
+//        svg.selectAll('.dot')
+//            .attr('cx', d => xScale(d.count))
+//            .attr('cy', d => yScale((d.population) / 500000))
+//            .attr('r', 10 / transform.k); // Scale the circle radius based on zoom level
+    }
+
+    const zoom = d3.zoom()
+        .scaleExtent([0.5, 4]) // Set the zoom scale limits
+        .on("zoom", zoomed);
+
+    // Attach the zoom behavior to the SVG element
+    svg.call(zoom);
+
+    }, [props.data,svg]);
 
     return (
         <div

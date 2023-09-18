@@ -34,10 +34,12 @@ export default function Blackhat(props){
 
             const stateData = props.data.states;
 
-            const stateCounts = Object.values(stateData).map(d=>d.count);
+            const stateCounts = Object.values(stateData).map(d=>((d.count/d.population)*1000000));
+
+            const stateCountsDeaths = Object.values(stateData).map(d=>((d.count/d.population)*50));
 
             //get color extends for the color legend
-            const [stateMin,stateMax] = d3.extent(stateCounts);
+            const [stateMin,stateMax] = d3.extent(stateCountsDeaths);
 
             //color map
             //we're using 1-0 to invert the red-yellow-green color scale
@@ -57,8 +59,19 @@ export default function Blackhat(props){
                 }
                 return entry[0].count;
             }
+
+            function getProbability(name){
+                //map uses full name, dataset uses abreviations
+                name = cleanString(name);
+                let entry = stateData.filter(d=>d.state===name);
+                if(entry === undefined | entry.length < 1){
+                    return 0
+                }
+                return (entry[0].count/entry[0].population)*100;
+            }
             function getStateVal(name){
-                let count = getCount(name);
+//                let count = getCount(name);
+                let count = getProbability(name)
                 let val = stateScale(count);
                 return val
             }
@@ -87,8 +100,10 @@ export default function Blackhat(props){
                     }
                     let sname = d.properties.NAME;
                     let count = getCount(sname);
+                    let probability = getProbability(sname);
                     let text = sname + '</br>'
-                        + 'Gun Deaths: ' + count;
+                        + 'Gun Deaths: ' + count + '<br>'
+                        + 'Probability of death:' + probability.toFixed(4) + '%';
                     tTip.html(text);
                 }).on('mousemove',(e)=>{
                     //see app.js for the helper function that makes this easier
@@ -114,7 +129,7 @@ export default function Blackhat(props){
                 .attr('id',d=>d.key)
                 .attr('cx',d=> projection([d.lng,d.lat])[0])
                 .attr('cy',d=> projection([d.lng,d.lat])[1])
-                .attr('r',d=>cityScale((d.count)**2))
+                .attr('r',d=>cityScale(((d.count)**2)/2))
                 .attr('opacity',0.7)
                 .on('mouseover',(e,d)=>{
                     let city = cleanString(d.city);
@@ -150,7 +165,7 @@ export default function Blackhat(props){
                 let legendY = bounds.y + 2*fontHeight;
 
                 let colorLData = [];
-                for(let ratio of [0.1,.2,.3,.4,.5,.6,.7,.8,.9,.99]){
+                for(let ratio of [0.1,.2,.3,.4,.5,.6,.7,.8,.9]){
                     let val = (1-ratio)*stateMin + ratio*stateMax;
                     let scaledVal = stateScale(val);
                     let color = colorMap(scaledVal);
@@ -160,7 +175,7 @@ export default function Blackhat(props){
                         'value': val,
                         'color':color,
                     }
-                    entry.text = (entry.value).toFixed(0);
+                    entry.text = (entry.value).toFixed(4);
             
                     colorLData.push(entry);
                     legendY += barHeight;
@@ -180,7 +195,7 @@ export default function Blackhat(props){
                 const legendTitle = {
                     'x': legendX - barWidth,
                     'y': bounds.y,
-                    'text': 'Gun Deaths' 
+                    'text': 'Probability of dying'
                 }
                 svg.selectAll('.legendText')
                     .data([legendTitle].concat(colorLData)).enter()
@@ -268,7 +283,7 @@ export default function Blackhat(props){
             }
         }
     },[mapGroupSelection,props.brushedState]);
-    
+
     return (
         <div
             className={"d3-component"}

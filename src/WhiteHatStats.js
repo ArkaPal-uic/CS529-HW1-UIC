@@ -104,7 +104,7 @@ export default function WhiteHatStats(props){
             .attr('text-anchor','middle')
             .attr('font-size',labelSize)
             .attr('font-weight','bold')
-            .text('How Hard it Is To Draw Each State Vs Gun Deaths');
+            .text('Deaths by gun violence in each state');
 
         //change the disclaimer here
         svg.append('text')
@@ -112,7 +112,7 @@ export default function WhiteHatStats(props){
             .attr('y',height/3)
             .attr('text-anchor','end')
             .attr('font-size',10)
-            .text("I'm just asking questions");
+            .text("Graph displaying death rate for both genders per state");
 
 // -----------
     let xAxis = d3.axisBottom(xScale);

@@ -10,7 +10,7 @@ export default function Blackhat(props){
     //this will automatically resize when the window changes so passing svg to a useeffect will re-trigger
     const [svg, height, width, tTip] = useSVGCanvas(d3Container);
     var isZoomed = false;
-    const maxRadius = width/3000;
+    const maxRadius = width/10000;
 
     //albers usa projection puts alaska in the corner
     //this automatically convert latitude and longitude to coordinates on the svg canvas
@@ -48,6 +48,7 @@ export default function Blackhat(props){
                 .domain([stateMin,stateMax])
                 .range([0,1]);
 
+//            const colourRange = ['#fff7fb','#ece7f2','#d0d1e6','#a6bddb','#74a9cf','#3690c0','#0570b0','#034e7b']
             const colorMap = d3.interpolateBlues;
 
             function getCount(name){
@@ -129,7 +130,7 @@ export default function Blackhat(props){
                 .attr('id',d=>d.key)
                 .attr('cx',d=> projection([d.lng,d.lat])[0])
                 .attr('cy',d=> projection([d.lng,d.lat])[1])
-                .attr('r',d=>cityScale(((d.count)**2)/2))
+                .attr('r',d=>cityScale((Math.PI*(d.count)**2)))
                 .attr('opacity',0.7)
                 .on('mouseover',(e,d)=>{
                     let city = cleanString(d.city);
@@ -138,11 +139,14 @@ export default function Blackhat(props){
                     }
 
 //                    Use this to check properties of "d"
-//                    console.log("This is the dataset: ", d);
+                    console.log("This is the dataset: ", d);
                     let cname = d.city;
                     let count = d.count;
+                    let male_count = d.male_count
                     let text = cname + '</br>'
-                        + 'Gun Deaths: ' + count;
+                        + 'Gun Deaths: ' + count + '<br>'
+                        + 'Male Deaths: ' + male_count + '<br>'
+                        + 'Female Deaths: ' + (count - male_count);
                     tTip.html(text);
                   })
                   .on('mousemove', (e) => {
@@ -165,7 +169,7 @@ export default function Blackhat(props){
                 let legendY = bounds.y + 2*fontHeight;
 
                 let colorLData = [];
-                for(let ratio of [0.1,.2,.3,.4,.5,.6,.7,.8,.9]){
+                for(let ratio of [0.1,.2,.3,.4,.5,.6,.7,.8,.9,.99]){
                     let val = (1-ratio)*stateMin + ratio*stateMax;
                     let scaledVal = stateScale(val);
                     let color = colorMap(scaledVal);
@@ -176,11 +180,11 @@ export default function Blackhat(props){
                         'color':color,
                     }
                     entry.text = (entry.value).toFixed(4);
-            
+
                     colorLData.push(entry);
                     legendY += barHeight;
                 }
-    
+
                 svg.selectAll('.legendRect').remove();
                 svg.selectAll('.legendRect')
                     .data(colorLData).enter()
@@ -190,7 +194,7 @@ export default function Blackhat(props){
                     .attr('fill',d=>d.color)
                     .attr('height',barHeight)
                     .attr('width',barWidth);
-    
+
                 svg.selectAll('.legendText').remove();
                 const legendTitle = {
                     'x': legendX - barWidth,
@@ -216,7 +220,7 @@ export default function Blackhat(props){
     //of how to do multiple hooks so updates don't have to occur in every state
     useMemo(()=>{
         if(mapGroupSelection === undefined){ return }
-        
+
         //set up zooming
         function zoomed(event) {
             const {transform} = event;
@@ -236,7 +240,7 @@ export default function Blackhat(props){
                     d3.zoomIdentity.translate(0,0),
                     d3.pointer(event,svg.node())
                 )
-                    
+
             }
             else{
                 //get bounds of path from map
@@ -259,7 +263,7 @@ export default function Blackhat(props){
                 props.setZoomedState(undefined);
             }
         }
-        
+
 
         mapGroupSelection.selectAll('.state')
             .attr('cursor','pointer')//so we know the states are clickable

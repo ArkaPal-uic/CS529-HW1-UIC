@@ -21,6 +21,16 @@
 
 ---
 
-The map utilises a blue colourscheme now. The intensity of blue hues correlates directly with the assessed probability of death of an individual. The colour-scale denotes the extent of said probability across states. The encoding for cities now utilises a factor of the square of the respective radii instead of the original. Tooltips for the encoding for both states and cities now show male and female deaths separately to showcase the disparity in the number of deaths by gender in areas.
+### Due credit to materials from assignment declaration:
+
+- State map: https://eric.clst.org/tech/usgeojson/
+- Original state population: US Census
+    - https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html
+- Original Slate gun violence dataset: https://www.slate.com/articles/news_and_politics/crime/2012/12/gun_death_tally_every_american_gun_death_since_newtown_sandy_hook_shooting.html
+- Andrew Wentzel for the template of code provided for this assignment.
+
+---
+
+The map utilises a blue colour scheme now. The intensity of blue hues correlates directly with the assessed probability of death of an individual. The colour-scale denotes the extent of said probability across states. The encoding for cities now utilises a factor of the square of the respective radii instead of the original. Tooltips for the encoding for both states and cities now show male and female deaths separately to showcase the disparity in the number of deaths by gender in areas.
 
 Coming to the graph - the X-axis quantifies the incidence of fatalities, whereas the Y-axis shows per states' population  as units of half a million. The shade of each circle acts to visualise the ratio of people killed by their gender in the particular state. A zoom and a pan feature have been implemented: the former allows for a more granular view of states which might seem to overlap in their colour and position in the graph, whilst the latter allows for movement of graph in varied conditions of being zoomed in or out. Finally, tool-tips for every circle in the encoding shows the state, as well as male and female deaths.

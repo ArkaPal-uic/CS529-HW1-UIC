@@ -79,7 +79,11 @@ function App() {
                 style={{'height': '100%','width':'14em','display':'inline-block','verticalAlign':'text-bottom'}}
               >
                 <h1>{'Instructions'}</h1>
-                <p>{'Click on each state to zoom and unzoom'}</p>
+                <p>{'1. Click on each state to zoom and unzoom'}</p>
+                <p>{'2. Hover over each state/city to see the stats for the area'}</p>
+                <p>{'3. Hover over each circle in the graph to see stats for the deaths in a particular city'}</p>
+                <p>{'4. To zoom into the graph to see the more congested areas, just scroll'}</p>
+                <p>{'5. Pan the area around the graph where you\'d like to observe cities when zoomed in/out by dragging the cursor.'}</p>
               </div>
             </div>
             <div style={{'height': '49%','width':'99%'}}>

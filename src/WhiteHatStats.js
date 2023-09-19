@@ -36,6 +36,7 @@ export default function WhiteHatStats(props){
                 'male_count': state.male_count,
                 'female_count': state.count - state.male_count,
                 'genderRatio': state.male_count/state.count,
+                'DeathRatio': state.male_count/(state.count - state.male_count),
                 'population': parseInt(state.population)
             }
             plotData.push(entry)
@@ -58,7 +59,7 @@ export default function WhiteHatStats(props){
                     meanY += entry.count/pvals.length
                 }
             }
-            let point = [yScale(i),xScale(meanY)]
+            let point = [xScale(i),yScale(meanY)]
             regressionLine.push(point)
         }
 
@@ -78,7 +79,8 @@ export default function WhiteHatStats(props){
             .on('mouseover',(e,d)=>{
                 let string = d.name + '</br>'
                     + 'Male Deaths: ' + d.male_count + '</br>'
-                    + 'Female Deaths: ' + d.female_count + '</br>';
+                    + 'Female Deaths: ' + d.female_count + '</br>'
+                    + 'Ratio of M/F deaths: ' + d.DeathRatio.toFixed(2);
                 props.ToolTip.moveTTipEvent(tTip,e)
                 tTip.html(string)
             }).on('mousemove',(e)=>{

@@ -36,3 +36,7 @@ The graph (`WhiteHatStats.js`) represents a grouped bar chart displaying Male an
     - https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html
 - Original Slate gun violence dataset: https://www.slate.com/articles/news_and_politics/crime/2012/12/gun_death_tally_every_american_gun_death_since_newtown_sandy_hook_shooting.html
 - Andrew Wentzel for the template of code provided for this assignment.
+
+---
+
+[!Image](https://github.com/ArkaPal-uic/CS529-HW1-UIC/blob/13ab497a9f8005c670ef491d187e82565dca3042/HW1.png)

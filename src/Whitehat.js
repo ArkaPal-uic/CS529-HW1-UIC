@@ -10,7 +10,7 @@ export default function Blackhat(props){
     //this will automatically resize when the window changes so passing svg to a useeffect will re-trigger
     const [svg, height, width, tTip] = useSVGCanvas(d3Container);
     var isZoomed = false;
-    const maxRadius = width/10000;
+    const maxRadius = width/100;
 
     //albers usa projection puts alaska in the corner
     //this automatically convert latitude and longitude to coordinates on the svg canvas
@@ -130,7 +130,7 @@ export default function Blackhat(props){
                 .attr('id',d=>d.key)
                 .attr('cx',d=> projection([d.lng,d.lat])[0])
                 .attr('cy',d=> projection([d.lng,d.lat])[1])
-                .attr('r',d=>cityScale((Math.PI*(d.count)**2)))
+                .attr('r',d=>cityScale(Math.sqrt(d.count)))
                 .attr('opacity',0.7)
                 .on('mouseover',(e,d)=>{
                     let city = cleanString(d.city);

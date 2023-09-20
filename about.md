@@ -1,9 +1,17 @@
 # CS529-HW1-UIC
 
+## Visualisation made "White-hat"
+
+A few ways in which the new visualisations better the "Blackhat" visualisations are:
+
+The map (`Whitehat.js`) utilises a blue colour scheme. The intensity of blue hues correlates directly with the assessed probability of death of an individual. The colour-scale denotes the extent of said probability across states. Tool-tips for the encoding for both states and cities now show male and female deaths separately to showcase the disparity in the number of deaths by gender in areas.
+
+The graph (`WhiteHatStats.js`) represents a grouped bar chart displaying Male and Female deaths for each state. The X-axis represents state abbreviations, whilst the Y-axis contains the minimum to the maximum number of deaths across states. Tool-tips provide the specific number of Male or Female deaths and the percentage of deaths of a gender with respect to the total death count. Code for Tool-tips were repurposed from `Whitehat.js`.
+
 ## Whitehat.js
 1. Blue colour: using `d3.interpolateBlues`
 2. To coordinate colour with probability: utilised variable `stateCountsDeaths` and mapped the interpolation with it.
-3. To keep scale consistent with map: Fixed the number of decimals shown for probability on the scale with the `toFixed f`unction.
+3. To keep scale consistent with map: Fixed the number of decimals shown for probability on the scale with the `toFixed` function.
 4. Tool-tips for markings: re-used code used for tool-tips for the states, edited contents to use dataset signified by variable `d`.
 
 ## WhiteHatStats.js
@@ -12,12 +20,6 @@
 2. The X axis shows the abbreviation (`d.abbreviation`) for each state whilst the Y axis (goes from the minimum to the maximum number of deaths across all states) shows the range of the number of deaths.
 3. Each tool-tip contains the relevant number of deaths (Male or female) and the percentage of deaths of a gender from the total death count.
 4. Re-used the code snippets for tool-tips from `Whitehat.js`.
-
-## Visualisation made "White-hat"
-
-The map (`Whitehat.js`) utilises a blue colour scheme. The intensity of blue hues correlates directly with the assessed probability of death of an individual. The colour-scale denotes the extent of said probability across states. The encoding for cities now utilises a factor of the square of the respective radii instead of the original. Tooltips for the encoding for both states and cities now show male and female deaths separately to showcase the disparity in the number of deaths by gender in areas.
-
-The graph (`WhiteHatStats.js`) represents a grouped bar chart displaying Male and Female deaths for each state. The X-axis represents state abbreviations, whilst the Y-axis contains the minimum to the maximum number of deaths across states. Tool-tips provide the specific number of Male or Female deaths and the percentage of deaths of a gender with respect to the total death count. Code for Tool-tips were repurposed from `Whitehat.js`.
 
 ---
 
@@ -39,4 +41,4 @@ The graph (`WhiteHatStats.js`) represents a grouped bar chart displaying Male an
 
 ---
 
-![Image](https://github.com/ArkaPal-uic/CS529-HW1-UIC/blob/13ab497a9f8005c670ef491d187e82565dca3042/HW1.png)
+![Image](https://github.com/ArkaPal-uic/CS529HW1/blob/f2084628becc9899561f92b82cd4d874c0901ea2/HW1.png)

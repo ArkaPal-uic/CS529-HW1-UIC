@@ -39,4 +39,4 @@ The graph (`WhiteHatStats.js`) represents a grouped bar chart displaying Male an
 
 ---
 
-[!Image](https://github.com/ArkaPal-uic/CS529-HW1-UIC/blob/13ab497a9f8005c670ef491d187e82565dca3042/HW1.png)
+![Image](https://github.com/ArkaPal-uic/CS529-HW1-UIC/blob/13ab497a9f8005c670ef491d187e82565dca3042/HW1.png)

@@ -38,53 +38,6 @@ export default function GunDeathsChart(props) {
             plotData.push(entry)
         }
 
-//        let yScale = d3.scaleLinear()
-//            .domain(d3.extent(plotData,d=>((d.population)/500000)))
-//            .range([height-margin-radius,margin+radius]);
-//        let xScale = d3.scaleLinear()
-//            .domain(d3.extent(plotData,d=>d.count))
-//            .range([margin+radius,width-margin-radius]);
-        //draw a line showing the mean values across the curve
-        //this probably isn't actually regression
-//        const regressionLine = [];
-//        for(let i = 0; i <= 10; i+= 1){
-//            let pvals = plotData.filter(d => Math.abs((d.population)/500000) <= .5);
-//            let meanY = 0;
-//            if(pvals.length > 0){
-//                for(let entry of pvals){
-//                    meanY += entry.count/pvals.length
-//                }
-//            }
-//            let point = [xScale(i),yScale(meanY)]
-//            regressionLine.push(point)
-//        }
-
-        //scale color by gender ratio for no reason
-//        let colorScale = d3.scaleDiverging()
-//            .domain([0,.5,1])
-//            .range(['magenta','white','navy']);
-
-        //draw the circles for each state
-//        svg.selectAll('.dot').remove();
-//        svg.selectAll('.dot').data(plotData)
-//            .enter().append('circle')
-//            .attr('cx',d=> xScale(d.count))
-//            .attr('cy',d=> yScale((d.population)/500000))
-//            .attr('fill',d=> colorScale(d.genderRatio))
-//            .attr('r',10)
-//            .on('mouseover',(e,d)=>{
-//                let string = d.name + '</br>'
-//                    + 'Male Deaths: ' + d.male_count + '</br>'
-//                    + 'Female Deaths: ' + d.female_count + '</br>'
-//                    + 'Ratio of M/F deaths: ' + d.DeathRatio.toFixed(2);
-//                props.ToolTip.moveTTipEvent(tTip,e)
-//                tTip.html(string)
-//            }).on('mousemove',(e)=>{
-//                props.ToolTip.moveTTipEvent(tTip,e);
-//            }).on('mouseout',(e,d)=>{
-//                props.ToolTip.hideTTip(tTip);
-//            });
-
         //Define xScale
         const xScale = d3.scaleBand()
             .domain(plotData.map((d) => d.abbreviation))
@@ -93,7 +46,7 @@ export default function GunDeathsChart(props) {
 
         //Define yScale
         const yScale = d3.scaleLinear()
-            .domain([d3.min(plotData, (d) => d.count), d3.max(plotData, (d) => d.count)])
+            .domain([d3.min(plotData, d => d.count), d3.max(plotData, d => d.count)])
             .range([height - margin, margin]);
 
         //Create the male bars in the graph

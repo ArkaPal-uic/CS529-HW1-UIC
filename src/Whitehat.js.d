@@ -2,7 +2,7 @@ import React, {useRef,useMemo} from 'react';
 import useSVGCanvas from './useSVGCanvas.js';
 import * as d3 from 'd3';
 
-export default function Whitehat(props){
+export default function Blackhat(props){
     //this is a generic component for plotting a d3 plot
     const d3Container = useRef(null);
     //this automatically constructs an svg canvas the size of the parent container (height and width)
@@ -10,8 +10,6 @@ export default function Whitehat(props){
     //this will automatically resize when the window changes so passing svg to a useeffect will re-trigger
     const [svg, height, width, tTip] = useSVGCanvas(d3Container);
     var isZoomed = false;
-
-    //TODO: change the line below to change the size of the white-hat maximum bubble size
     const maxRadius = width/100;
 
     //albers usa projection puts alaska in the corner
@@ -24,40 +22,35 @@ export default function Whitehat(props){
 
     //we need to use this function to convert state names into ids so we can select individual states by name using javascript selectors
     //since spaces makes it not work correctly
-    function cleanString(string){
-        return string.replace(' ','_').replace(' ','_')
+    function cleanString(d){
+        return d.replace(' ','_').replace(' ','_')
     }
 
 
-    //This is the main loop that renders the code once the data loads
-    //TODO: edit or replace this code to create your white-hat version of the map view; for example, change the color map based on colorbrewer2, 
+    //you can use a hook like this to set up axes or things that don't require waiting for the data to load so it only draws once
     const mapGroupSelection = useMemo(()=>{
         //wait until the svg is rendered and data is loaded
         if(svg !== undefined & props.map !== undefined & props.data !== undefined){
 
             const stateData = props.data.states;
 
-            //EDIT THIS TO CHANGE WHAT IS USED TO ENCODE COLOR
-            const getEncodedFeature = d => d.count
+            const stateCounts = Object.values(stateData).map(d=>((d.count/d.population)*1000000));
 
-            //this section of code sets up the colormap
-            const stateCounts = Object.values(stateData).map(getEncodedFeature);
+            const stateCountsDeaths = Object.values(stateData).map(d=>((d.count/d.population)*50));
 
             //get color extends for the color legend
-            const [stateMin,stateMax] = d3.extent(stateCounts);
+            const [stateMin,stateMax] = d3.extent(stateCountsDeaths);
 
-            //color map scale, scales numbers to a smaller range to use with a d3 color scale
+            //color map
             //we're using 1-0 to invert the red-yellow-green color scale
             //so red is bad (p.s. this is not a good color scheme still)
             const stateScale = d3.scaleLinear()
                 .domain([stateMin,stateMax])
-                .range([1,0]);
+                .range([0,1]);
 
-            //TODO: EDIT HERE TO CHANGE THE COLOR SCHEME
-            //this function takes a number 0-1 and returns a color
-            const colorMap = d3.interpolateRdYlGn;
+//            const colourRange = ['#fff7fb','#ece7f2','#d0d1e6','#a6bddb','#74a9cf','#3690c0','#0570b0','#034e7b']
+            const colorMap = d3.interpolateBlues;
 
-            //this set of functions extracts the features given the state name from the geojson
             function getCount(name){
                 //map uses full name, dataset uses abreviations
                 name = cleanString(name);
@@ -65,10 +58,21 @@ export default function Whitehat(props){
                 if(entry === undefined | entry.length < 1){
                     return 0
                 }
-                return getEncodedFeature(entry[0]);
+                return entry[0].count;
+            }
+
+            function getProbability(name){
+                //map uses full name, dataset uses abreviations
+                name = cleanString(name);
+                let entry = stateData.filter(d=>d.state===name);
+                if(entry === undefined | entry.length < 1){
+                    return 0
+                }
+                return (entry[0].count/entry[0].population)*100;
             }
             function getStateVal(name){
-                let count = getCount(name);
+//                let count = getCount(name);
+                let count = getProbability(name)
                 let val = stateScale(count);
                 return val
             }
@@ -80,13 +84,11 @@ export default function Whitehat(props){
             //clear earlier drawings
             svg.selectAll('g').remove();
 
-            //OPTIONAL: EDIT THIS TO CHANGE THE DETAILS OF HOW THE MAP IS DRAWN
             //draw borders from map and add tooltip
             let mapGroup = svg.append('g').attr('class','mapbox');
             mapGroup.selectAll('path').filter('.state')
                 .data(props.map.features).enter()
                 .append('path').attr('class','state')
-                //ID is useful if you want to do brushing as it gives you a way to select the path
                 .attr('id',d=> cleanString(d.properties.NAME))
                 .attr('d',geoGenerator)
                 .attr('fill',getStateColor)
@@ -94,14 +96,15 @@ export default function Whitehat(props){
                 .attr('stroke-width',.1)
                 .on('mouseover',(e,d)=>{
                     let state = cleanString(d.properties.NAME);
-                    //this updates the brushed state
                     if(props.brushedState !== state){
                         props.setBrushedState(state);
                     }
                     let sname = d.properties.NAME;
                     let count = getCount(sname);
+                    let probability = getProbability(sname);
                     let text = sname + '</br>'
-                        + 'Gun Deaths: ' + count;
+                        + 'Gun Deaths: ' + count + '<br>'
+                        + 'Probability of death:' + probability.toFixed(4) + '%';
                     tTip.html(text);
                 }).on('mousemove',(e)=>{
                     //see app.js for the helper function that makes this easier
@@ -112,40 +115,60 @@ export default function Whitehat(props){
                 });
 
 
-            //TODO: replace or edit the code below to change the city marker being used. Hint: think of the cityScale range (perhaps use area rather than radius). 
             //draw markers for each city
             const cityData = props.data.cities
             const cityMax = d3.max(cityData.map(d=>d.count));
             const cityScale = d3.scaleLinear()
                 .domain([0,cityMax])
-                .range([0,maxRadius]);
+                .range([0,maxRadius**2]);
 
             mapGroup.selectAll('.city').remove();
 
-            //TODO: Add code for a tooltip when you mouse over the city (hint: use the same code for the state tooltip events .on... and modify what is used for the tTip.html)
-            //OPTIONAL: change the color or opacity
             mapGroup.selectAll('.city')
                 .data(cityData).enter()
                 .append('circle').attr('class','city')
                 .attr('id',d=>d.key)
                 .attr('cx',d=> projection([d.lng,d.lat])[0])
                 .attr('cy',d=> projection([d.lng,d.lat])[1])
-                .attr('r',d=>cityScale(d.count))
-                .attr('opacity',.5);                
+                .attr('r',d=>cityScale(Math.sqrt(d.count)))
+                .attr('opacity',0.7)
+                .on('mouseover',(e,d)=>{
+                    let city = cleanString(d.city);
+                    if(props.brushedState !== city){
+                        props.setBrushedState(city);
+                    }
 
-            
-            //draw a color legend, automatically scaled based on data extents
+//                    Use this to check properties of "d"
+                    console.log("This is the dataset: ", d);
+                    let cname = d.city;
+                    let count = d.count;
+                    let male_count = d.male_count
+                    let text = cname + '</br>'
+                        + 'Gun Deaths: ' + count + '<br>'
+                        + 'Male Deaths: ' + male_count + '<br>'
+                        + 'Female Deaths: ' + (count - male_count);
+                    tTip.html(text);
+                  })
+                  .on('mousemove', (e) => {
+                    // Update tooltip position as the mouse moves
+                    props.ToolTip.moveTTipEvent(tTip, e);
+                  })
+                  .on('mouseout', () => {
+                    // Hide the tooltip on mouseout
+                    props.ToolTip.hideTTip(tTip);
+                  });
+
+            // //draw a color legend, automatically scaled based on data extents
             function drawLegend(){
                 let bounds = mapGroup.node().getBBox();
                 const barHeight = Math.min(height/10,40);
-                
+
                 let legendX = bounds.x + 10 + bounds.width;
                 const barWidth = Math.min((width - legendX)/3,40);
                 const fontHeight = Math.min(barWidth/2,16);
                 let legendY = bounds.y + 2*fontHeight;
-                
+
                 let colorLData = [];
-                //OPTIONAL: EDIT THE VALUES IN THE ARRAY TO CHANGE THE NUMBER OF ITEMS IN THE COLOR LEGEND
                 for(let ratio of [0.1,.2,.3,.4,.5,.6,.7,.8,.9,.99]){
                     let val = (1-ratio)*stateMin + ratio*stateMax;
                     let scaledVal = stateScale(val);
@@ -156,12 +179,12 @@ export default function Whitehat(props){
                         'value': val,
                         'color':color,
                     }
-                    entry.text = (entry.value).toFixed(0);
-            
+                    entry.text = (entry.value).toFixed(4);
+
                     colorLData.push(entry);
                     legendY += barHeight;
                 }
-    
+
                 svg.selectAll('.legendRect').remove();
                 svg.selectAll('.legendRect')
                     .data(colorLData).enter()
@@ -171,12 +194,12 @@ export default function Whitehat(props){
                     .attr('fill',d=>d.color)
                     .attr('height',barHeight)
                     .attr('width',barWidth);
-    
+
                 svg.selectAll('.legendText').remove();
                 const legendTitle = {
                     'x': legendX - barWidth,
                     'y': bounds.y,
-                    'text': 'Gun Deaths' 
+                    'text': 'Probability of dying'
                 }
                 svg.selectAll('.legendText')
                     .data([legendTitle].concat(colorLData)).enter()
@@ -197,7 +220,7 @@ export default function Whitehat(props){
     //of how to do multiple hooks so updates don't have to occur in every state
     useMemo(()=>{
         if(mapGroupSelection === undefined){ return }
-        
+
         //set up zooming
         function zoomed(event) {
             const {transform} = event;
@@ -209,8 +232,6 @@ export default function Whitehat(props){
         const zoom = d3.zoom()
             .on("zoom", zoomed);
 
-        //OPTIONAL: EDIT THIS CODE TO CHANGE WHAT HAPPENS WHEN YOU CLICK A STATE
-        //useful if you want to add brushing
         function clicked(event, d) {
             event.stopPropagation();
             if(isZoomed){
@@ -219,7 +240,7 @@ export default function Whitehat(props){
                     d3.zoomIdentity.translate(0,0),
                     d3.pointer(event,svg.node())
                 )
-                    
+
             }
             else{
                 //get bounds of path from map
@@ -234,7 +255,6 @@ export default function Whitehat(props){
                     d3.pointer(event, svg.node())
                 );
             }
-            //sets the zoomed state property in the main app when we click on something
             //if we are zoomed in, unzoom instead
             isZoomed = !isZoomed;
             if(isZoomed){
@@ -243,7 +263,7 @@ export default function Whitehat(props){
                 props.setZoomedState(undefined);
             }
         }
-        
+
 
         mapGroupSelection.selectAll('.state')
             .attr('cursor','pointer')//so we know the states are clickable
@@ -251,8 +271,6 @@ export default function Whitehat(props){
 
     },[mapGroupSelection]);
 
-    //OPTIONAL: EDIT HERE TO CHANGE THE BRUSHING BEHAVIOUR IN THE MAP WHEN MOUSING OVER A STATE
-    //WILL UPDATE WHEN THE "BRUSHEDSTATE" VARIABLE CHANGES
     //brush the state by altering it's opacity when the property changes
     //brushed state can be on the same level but that makes it harder to use in linked views
     //so its in the parent app to simplify the "whitehat" part which uses linked views.
@@ -269,7 +287,7 @@ export default function Whitehat(props){
             }
         }
     },[mapGroupSelection,props.brushedState]);
-    
+
     return (
         <div
             className={"d3-component"}
